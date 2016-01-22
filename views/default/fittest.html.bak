@@ -1,0 +1,75 @@
+{{extend 'layout.html'}}
+<h1>Fit Test</h1>
+<h6>The fit test is designed to help you track your progress. You will complete the same test five times. Once prior to</h6>
+<h6>beginning your workout program and at the end of each week. After you complete the last fit test we will break</h6>
+<h6>down your progress so you can see how much stronger you got each week.</h6>
+<br><br>
+
+{{if user_page.counter is None:}}
+    <h4>Fit Test #1 - Please complete this test before your first workout.</h4>
+    <h6>Perform the following exercises for 60 seconds each and record the number of reps you complete.</h6><br>
+    {{=form}}
+{{elif user_page.counter == 2:}}
+    <h4>Fit Test #2 - Please complete this test after Week 1 of your workout program.</h4>
+    <h6>Perform the following exercises for 60 seconds each and record the number of reps you complete.</h6><br>
+    {{=form}}
+{{elif user_page.counter == 3:}}
+    <h4>Fit Test #3 - Please complete this test after Week 2 of your workout program.</h4>
+    <h6>Perform the following exercises for 60 seconds each and record the number of reps you complete.</h6><br>
+    {{=form}}
+{{elif user_page.counter == 4:}}
+    <h4>Fit Test #4 - Please complete this test after Week 3 of your workout program.</h4>
+    <h6>Perform the following exercises for 60 seconds each and record the number of reps you complete.</h6><br>
+    {{=form}}
+{{elif user_page.counter == 5:}}
+    <h4>Fit Test #5 - Please complete this test after Week 4 of your workout program.</h4>
+    <h6>Perform the following exercises for 60 seconds each and record the number of reps you complete.</h6><br>
+    {{=form}}
+{{else:}}
+    <div class = "well">
+	  <h4>Congratulations! You made it through your four week program!</h4><br>
+      <h4>Now let's take a look at your results...</h4><br>
+      <h5>Before beginning your workout program you were able to do:</h5>
+      <span class = "boldblacktext"> Pushups: </span> {{=user_page.pushup}} <br>
+	  <span class = "boldblacktext"> Pullups: </span> {{=user_page.pullup}} <br>
+	  <span class = "boldblacktext"> Burpees: </span> {{=user_page.burpee}} <br>
+	  <span class = "boldblacktext"> Squat Jumps: </span> {{=user_page.squatjump}} <br>
+	  <br>
+	  <h5>After completing week 1 of your workout program you were able to do:</h5>
+      <span class = "boldblacktext"> Pushups: </span> {{=user_page.pushup2}} ({{=(int(user_page.pushup2) - int(user_page.pushup))}} more than last week!)<br>
+	  <span class = "boldblacktext"> Pullups: </span> {{=user_page.pullup2}} ({{=(int(user_page.pullup2) - int(user_page.pullup))}} more than last week!)<br>
+	  <span class = "boldblacktext"> Burpees: </span> {{=user_page.burpee2}} ({{=(int(user_page.burpee2) - int(user_page.burpee))}} more than last week!)<br>
+	  <span class = "boldblacktext"> Squat Jumps: </span> {{=user_page.squatjump2}} ({{=(int(user_page.squatjump2) - int(user_page.squatjump))}} more than last week!)<br>
+	  <br>
+	  <h5>After completing week 2 of your workout program you were able to do:</h5>
+      <span class = "boldblacktext"> Pushups: </span> {{=user_page.pushup3}} ({{=(int(user_page.pushup3) - int(user_page.pushup2))}} more than last week!)<br>
+	  <span class = "boldblacktext"> Pullups: </span> {{=user_page.pullup3}} ({{=(int(user_page.pullup3) - int(user_page.pullup2))}} more than last week!)<br>
+	  <span class = "boldblacktext"> Burpees: </span> {{=user_page.burpee3}} ({{=(int(user_page.burpee3) - int(user_page.burpee2))}} more than last week!)<br>
+	  <span class = "boldblacktext"> Squat Jumps: </span> {{=user_page.squatjump3}} ({{=(int(user_page.squatjump3) - int(user_page.squatjump2))}} more than last week!)<br>
+	  <br>
+	  <h5>After completing week 3 of your workout program you were able to do:</h5>
+      <span class = "boldblacktext"> Pushups: </span> {{=user_page.pushup4}} ({{=(int(user_page.pushup4) - int(user_page.pushup3))}} more than last week!)<br>
+	  <span class = "boldblacktext"> Pullups: </span> {{=user_page.pullup4}} ({{=(int(user_page.pullup4) - int(user_page.pullup3))}} more than last week!)<br>
+	  <span class = "boldblacktext"> Burpees: </span> {{=user_page.burpee4}} ({{=(int(user_page.burpee4) - int(user_page.burpee3))}} more than last week!)<br>
+	  <span class = "boldblacktext"> Squat Jumps: </span> {{=user_page.squatjump4}} ({{=(int(user_page.squatjump4) - int(user_page.squatjump3))}} more than last week!)<br>
+	  <br>
+	  <h5>After completing the last week of your workout program you were able to do:</h5>
+      <span class = "boldblacktext"> Pushups: </span> {{=user_page.pushup5}} ({{=(int(user_page.pushup5) - int(user_page.pushup4))}} more than last week!)<br>
+	  <span class = "boldblacktext"> Pullups: </span> {{=user_page.pullup5}} ({{=(int(user_page.pullup5) - int(user_page.pullup4))}} more than last week!)<br>
+	  <span class = "boldblacktext"> Burpees: </span> {{=user_page.burpee5}} ({{=(int(user_page.burpee5) - int(user_page.burpee4))}} more than last week!)<br>
+	  <span class = "boldblacktext"> Squat Jumps: </span> {{=user_page.squatjump5}} ({{=(int(user_page.squatjump5) - int(user_page.squatjump4))}} more than last week!)<br>
+	  <br>
+   </div>
+{{pass}}
+
+{{=A('Back', _class = 'btn', _href = URL('default', 'index'))}}
+
+<!-- CSS to make the text bold and larger than average -->
+<style type = 'text/css'>
+    .boldblacktext{
+        padding: 1%;
+        font-size:13px;
+        font-weight:bold;
+    }
+
+</style>

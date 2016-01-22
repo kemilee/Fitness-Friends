@@ -1,0 +1,38 @@
+{{left_sidebar_enabled,right_sidebar_enabled=False,('message' in globals())}}
+{{extend 'layout.html'}}
+
+{{if user_page is not None:}}
+    <h1>{{=user_page.username}}'s Profile</h1>
+    <hr>
+          {{=A('Forums', _class = 'btn btn-info', _href = (URL('default', 'main_forum')))}}
+          {{=A('My Workout', _class = 'btn btn-success', _href = (URL('default', 'my_workout', vars = dict(body = user_page.body, program = user_page.program))))}}
+          {{=A('Edit Info', _class = 'btn btn-info', _href = (URL('default', 'edit')))}}
+          {{=A('Fit Test', _class = 'btn btn-success', _href = (URL('default', 'fittest')))}}
+          
+    <hr>
+
+    <div class = "well">
+      <span class = "boldblacktext"> Username: </span> {{=user_page.username}} <br>
+	  <span class = "boldblacktext"> Sex: </span> {{=user_page.sex}} <br>
+	  <span class = "boldblacktext"> Age: </span> {{=user_page.age}} years<br>
+	  <span class = "boldblacktext"> Height: </span> {{=user_page.height}} inches<br>
+	  <span class = "boldblacktext"> Weight: </span> {{=user_page.weight}} lbs<br>
+	  <span class = "boldblacktext"> Build: </span> {{=user_page.current_build}} <br>
+	  <br>
+	  <span class = "boldblacktext"> Based on your survey results: </span> {{=body_description}} <br>
+      <br><br>
+   </div>
+{{else:}}
+    <h1> Survey </h1>
+    {{=form}}
+{{pass}}
+
+<!-- CSS to make the text bold and larger than average -->
+<style type = 'text/css'>
+    .boldblacktext{
+        padding: 1%;
+        font-size:15px;
+        font-weight:bold;
+    }
+
+</style>

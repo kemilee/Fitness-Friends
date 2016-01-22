@@ -1,0 +1,10 @@
+{{extend 'layout.html'}}
+<h1>{{=title}}</h1>
+
+{{=A('Profile', _class = 'btn btn-info', _href = URL('default', 'index'))}}
+{{=A('Back', _class = 'btn btn-inverse', _href = URL('default', 'forum', args = [to_topic]))}}
+<br> <br>
+{{if not add:}}
+    {{=A('Add Post', _class = 'btn btn-success', _href = (URL('default', 'thread', args = [row_id], user_signature = True, vars = dict(add = 'true'))))}}
+{{pass}}
+    {{=thread_list}}

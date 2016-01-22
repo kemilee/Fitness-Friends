@@ -1,0 +1,299 @@
+# -*- coding: utf-8 -*-
+# this file is released under public domain and you can use without limitations
+
+import logging
+
+@auth.requires_login()
+def index():
+    #if the user has an account --> show profile
+    #if the user does not have an account --> go to survey and make profile
+    user_page = get_user()
+    form = None
+    body_description = None
+    program = []
+    
+    if user_page is None:
+        #do survey stuff
+        form = survey_form(user_page)
+        if form.process().accepted:
+            db.users.insert(username = form.vars.username, user_id = auth.user_id,
+							sex = form.vars.sex, weight = form.vars.weight,
+							height = form.vars.height, age = form.vars.age, 
+							shoulders = form.vars.shoulders, waist = form.vars.waist,
+							current_build = form.vars.current_build, weight_gain = form.vars.weight_gain)
+            #find the user page and add the body type
+            #it's best to add the body type and program now, so that it
+            #doesn't have to be calculated everytime the user loads their profile
+            user_page = get_user()
+            user_page.update_record(body = formula(user_page))
+            #add in the program for their specific body type
+            user_page.update_record(program = find_program(user_page.body))
+            redirect(URL('default', 'index'))
+    else:
+        #stuff to do when the page DOES exist
+        body_description = bodyDescription(user_page.body)
+    return dict(user_page = user_page, form = form, body_description = body_description)
+
+#my_workout plan page
+def my_workout():
+    body = request.vars.body
+    program = request.vars.program
+    #checking if you came from index (program is of type str if you come from index)
+    if type(program) is str:
+        program = request.vars.program.split('|')
+        program.pop(0)
+    return dict(program = program, body = body)
+
+#gets the user's page
+def get_user():
+    return db(db.users.user_id == auth.user_id).select().first()
+
+def main_forum():
+    #generates a View Topic button that goes to the list of topics for the main topic
+    #goes to function forum (for now)
+	def generate_view_topic_button(row):
+		b = ''
+		b = A('View Topic Forum', _class='btn btn-info', _href=URL('default', 'forum', args=[row.id], user_signature = True))
+		return b
+
+	forum = None
+	viewbutton = None
+
+	links = [ dict(header='', body = generate_view_topic_button), ]
+
+	f = db.forum
+	forum = SQLFORM.grid(f,
+		fields = [db.forum.title],
+		links=links,
+		csv = False, editable = False, deletable = False, create = False,
+		search_widget = False, details = False
+	    )
+	return dict(forum=forum)
+
+def edit():
+        user_page = get_user()
+        form = survey_form(user_page)
+        if form.process().accepted:
+            user_page.update_record(username = form.vars.username, user_id = auth.user_id,
+							sex = form.vars.sex, weight = form.vars.weight,
+							height = form.vars.height, age = form.vars.age, 
+							shoulders = form.vars.shoulders, waist = form.vars.waist,
+							current_build = form.vars.current_build, weight_gain = form.vars.weight_gain)
+            user_page.update_record(body = formula(user_page))
+            user_page.update_record(program = find_program(user_page.body))
+            redirect(URL('default', 'index'))
+        return dict(form = form)
+
+#this handles storing the user's five different Fit Test results
+def fittest():
+        user_page = get_user()
+        form = SQLFORM.factory(
+            Field('pushup', label = 'Pushups', requires=IS_INT_IN_RANGE(0,1000,error_message='Please choose an integer value')),
+            Field('pullup', label = 'Pullups', requires=IS_INT_IN_RANGE(0,1000,error_message='Please choose an integer value')),
+            Field('burpee', label = 'Burpees', requires=IS_INT_IN_RANGE(0,1000,error_message='Please choose an integer value')),
+            Field('squatjump', label = 'Squat Jumps', requires=IS_INT_IN_RANGE(0,1000,error_message='Please choose an integer value'))
+        )
+        if form.process().accepted:
+            if (user_page.counter is None):
+                user_page.update_record(user_id = auth.user_id,
+   	                pushup = form.vars.pushup, pullup = form.vars.pullup,
+                    burpee = form.vars.burpee, squatjump = form.vars.squatjump, counter = 2)
+            elif (user_page.counter == 2):
+                user_page.update_record(user_id = auth.user_id,
+   	                pushup2 = form.vars.pushup, pullup2 = form.vars.pullup,
+                    burpee2 = form.vars.burpee, squatjump2 = form.vars.squatjump, counter = 3)
+            elif (user_page.counter == 3):
+                user_page.update_record(user_id = auth.user_id,
+   	                pushup3 = form.vars.pushup, pullup3 = form.vars.pullup,
+                    burpee3 = form.vars.burpee, squatjump3 = form.vars.squatjump, counter = 4)
+            elif (user_page.counter == 4):
+                user_page.update_record(user_id = auth.user_id,
+   	                pushup4 = form.vars.pushup, pullup4 = form.vars.pullup,
+                    burpee4 = form.vars.burpee, squatjump4 = form.vars.squatjump, counter = 5)
+            elif (user_page.counter == 5):
+                user_page.update_record(user_id = auth.user_id,
+   	                pushup5 = form.vars.pushup, pullup5 = form.vars.pullup,
+                    burpee5 = form.vars.burpee, squatjump5 = form.vars.squatjump, counter = 6)
+            redirect(URL('default', 'index'))
+        return dict(form = form, user_page = user_page)
+
+def forum():
+    #gets which main topic the user clicked
+    main_topic = db.forum(request.args(0)) or redirect(URL('default', 'index'))
+    row_id = request.args(0)
+    #list of topics on that main topic's forum
+    topic_list = (db.topics.f_table == main_topic)
+    #main topic's name
+    title = main_topic.title
+    
+    def generate_view_thread_button(row):
+        b = ''
+        b = A('View Thread Forum', _class='btn', _href=URL('default', 'thread', args=[row.id], user_signature = True, vars = dict(topic_id = row_id)))
+        return b
+
+    forum = None
+
+    links = [ dict(header='', body = generate_view_thread_button)]
+
+    #checks if the user wants to add a new topic
+    new_topic = request.vars.add == 'true'
+
+    if new_topic:
+        #prompts user to enter information
+        form = SQLFORM.factory(Field('title', label = 'Title'))
+        if form.process().accepted:
+            #added into topics table
+            db.topics.insert(title = form.vars.title, f_table = main_topic)
+            #redirected back and sets add to false
+            redirect(URL('default', 'forum', args = [row_id], user_signature = True,
+                         vars = dict(add = 'false')))
+        forum_topics = form
+    #grid that lists all of the topics within the main topic
+    else:
+        #puts out normal topics table
+        forum_topics = SQLFORM.grid(topic_list, user_signature = False,
+                               orderby =~db.topics.topic_posted,
+                               fields = [db.topics.topic_posted, db.topics.poster,
+                                         db.topics.title],
+                               links = links,
+                               csv = False, editable = False, deletable = False,
+                               details = False, create = False, search_widget = False)
+
+    return dict(forum_topics = forum_topics, title = title, row_id = row_id, new_topic = new_topic)
+
+def thread():
+    #gets which main topic the user clicked
+    topic = db.topics(request.args(0)) or redirect(URL('default', 'forum', args = request.vars.topic_id))
+    title = topic.title
+    
+    #used for the back button; args = [to_topic] = request.args(0)
+    to_topic = request.vars.topic_id
+    
+    #picks the thread attached to the topic
+    topic_thread = (db.threads.topic_table == topic)
+    
+    #if they're adding a post 
+    new_thread = request.vars.add == 'true'
+    
+    #if true, have them enter information & insert thread
+    if new_thread:
+        form = SQLFORM.factory(Field('body', 'text', label = 'Post'))
+        if form.process().accepted:
+            db.threads.insert(body = form.vars.body, topic_table = topic)
+            redirect(URL('default', 'thread', args = request.args(0), user_signature = True, vars = dict(add = 'false')))
+        thread_list = form
+    else:
+        #display entire thread
+        thread_list = SQLFORM.grid(topic_thread, args = request.args[:1],
+                               fields = [db.threads.thread_poster, db.threads.thread_posted,
+                                         db.threads.body],
+                               search_widget = False, create = False,
+                               csv = False, editable = False, deletable = False,
+                               details = False)
+        
+    def shorten_post(row):
+        return row.title[:20] + '...'
+    
+    return dict(title = title, thread_list = thread_list, row_id = request.args(0), to_topic = to_topic)
+
+def survey_form(user_page):
+    form = SQLFORM.factory(db.users, record = user_page)
+    return form
+
+#function to determine body type based on survey
+def formula(users):
+    if ((users.shoulders=='Wide') & (users.waist=='Narrow') & (users.weight_gain=='Gain and Lose Easily') & (users.current_build=='Athletic')):
+        bodytype = 'Mesomorphic'
+    elif ((users.shoulders=='Narrow') & (users.waist=='Narrow') & (users.weight_gain=='Difficult Gaining') & (users.current_build=='Lean')):
+        bodytype = 'Ectomorphic'
+    elif ((users.shoulders=='Wide') & (users.waist=='Wide') & (users.weight_gain=='Easily Gained, Difficult Losing') & (users.current_build=='Round')):
+        bodytype = 'Endomorphic'
+    elif ((users.waist=='Narrow') & (users.weight_gain=='Gain and Lose Easily') & (users.current_build=='Athletic')):
+        bodytype = 'Mesomorphic'
+    elif ((users.waist=='Narrow') & (users.weight_gain=='Difficult Gaining') & (users.current_build=='Lean')):
+        bodytype = 'Ectomorphic'
+    elif ((users.waist=='Wide') & (users.weight_gain=='Easily Gained, Difficult Losing') & (users.current_build=='Round')):
+        bodytype = 'Endomorphic'
+    elif ((users.weight_gain=='Gain and Lose Easily') & (users.current_build=='Athletic')):
+        bodytype = 'Mesomorphic'
+    elif ((users.weight_gain=='Difficult Gaining') & (users.current_build=='Lean')):
+        bodytype = 'Ectomorphic'
+    elif ((users.weight_gain=='Easily Gained, Difficult Losing') & (users.current_build=='Round')):
+        bodytype = 'Endomorphic'
+    elif (users.weight_gain=='Gain and Lose Easily'):
+        bodytype = 'Mesomorphic'
+    elif (users.weight_gain=='Difficult Gaining'):
+        bodytype = 'Ectomorphic'
+    else:
+        bodytype = 'Endomorphic' 
+    return (bodytype)
+
+#function to return description based on bodytype
+def bodyDescription(bodytype):
+    description = None
+    if (bodytype=='Mesomorphic'):
+        description = "Your body type is mesomorphic. This means your body responds best to weight training and you will see your gains quicker. Lucky for you, this is the best body type for bodybuilding and serves as the perfect platform for building muscle."
+    elif (bodytype=='Ectomorphic'):
+        description = 'Your body type is ectomorphic. This means you have a fast metabolism and burn calories very quickly. In order to gain weight, your calorie intake must be very high. We also recommend eating before bed to prevent muscle catabolism during the night.'
+    elif (bodytype=='Endomorphic'):
+        description = 'Your body type is endomorphic. This means it is very easy for you to gain weight. Unfortunately, a large portion of this weight is fat. Along with weight lifting to gain muscle, we recommend incorporating intense cardio training to maximize your gains.'
+    return (description)
+
+def find_program(bodytype):
+    program = []
+    if bodytype == 'Mesomorphic':
+        program = ["Leverage Incline Chest", "Rope Push-Down", "Rest", "Reverse-Grip Pull-Down", "Seated Side Dumbbell Lateral", "Lying Leg Curl", "Rest", "Incline Dumbbell Press", "Tricep Pushdown", "Rest", "Wide-Grip Lat Pulldown", "Leverage Shoulder Press", "Leg Extensions", "Rest", "Dumbbell Side Lateral", "Wide-Grip Pull-Down", "Rest", "Incline Barbell Press", "Leg Extensions", "Lying Leg Curl", "Rest", "Front Chin-Up", "Incline Dumbbell Flyes", "Rest", "Lying Leg Curls", "Leverage Shoulder Press", "Rest", "Incline Dumbbell Flyes"]
+    elif bodytype == 'Endomorhpic':
+        program = ["Bent Over Two-Dubbell Row", "Bench Press", "Elliptical Trainer or Exercise Bike", "Squats", "Underhand Pull-Up", "Rest", "Rest", "Leg Press", "Exercise Bike", "Rest", "Bench Press", "Outdoor Sprints", "Barbell Squat", "Rest", "Outdoor Sprints", "Dumbbell Bench Press", "Rest", "Step Master", "Bent Over Barbell Row", "Incline Bench Press", "Rest", "Leg Press", "Bent Over Two-Dumbbell Row", "Rest", "Outdoor Sprints", "Squats", "Rest", "Outdoor Run"]
+    else:
+        program = ["Pushups", "Pullups", "Rest", "Leg Extensions", "Rest", "Triceps Rope Pushown", " Rest", "Pushups", "Military Press", "Rest", "Barbell Squat", "Rest", "Hammer Curls", "Rest", "Pushups", "Leg Extensions", "Rest", "Pullups", "Rest", "Jump Rope", "Rest", "Pushups", "Rest", "Barbell Squat", "Rest", "Dips", "Rest", "Jump Rope"]
+    return (program)
+
+def user():
+    """
+    exposes:
+    http://..../[app]/default/user/login
+    http://..../[app]/default/user/logout
+    http://..../[app]/default/user/register
+    http://..../[app]/default/user/profile
+    http://..../[app]/default/user/retrieve_password
+    http://..../[app]/default/user/change_password
+    http://..../[app]/default/user/manage_users (requires membership in
+    use @auth.requires_login()
+        @auth.requires_membership('group name')
+        @auth.requires_permission('read','table name',record_id)
+    to decorate functions that need access control
+    """
+    return dict(form=auth())
+
+
+@cache.action()
+def download():
+    """
+    allows downloading of uploaded files
+    http://..../[app]/default/download/[filename]
+    """
+    return response.download(request, db)
+
+
+def call():
+    """
+    exposes services. for example:
+    http://..../[app]/default/call/jsonrpc
+    decorate with @services.jsonrpc the functions to expose
+    supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv
+    """
+    return service()
+
+
+@auth.requires_login() 
+def api():
+    """
+    this is example of API with access control
+    WEB2PY provides Hypermedia API (Collection+JSON) Experimental
+    """
+    from gluon.contrib.hypermedia import Collection
+    rules = {
+        '<tablename>': {'GET':{},'POST':{},'PUT':{},'DELETE':{}},
+        }
+    return Collection(db).process(request,response,rules)

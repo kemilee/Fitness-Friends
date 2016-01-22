@@ -1,0 +1,110 @@
+{{extend 'layout.html'}}
+
+
+{{=A('Profile', _class = 'btn btn-info', _href = (URL('default', 'index')))}}
+
+
+<hr> <p>
+    <h2>
+        8 Week Program
+    </h2>
+</p> <hr>
+
+<table class="table table-bordered table-condensed">
+  <thead>
+      <tr class = "rowbg">
+          <th> Day 1 </th> <th> Day 2 </th>
+          <th> Day 3 </th> <th> Day 4 </th>
+          <th> Day 5 </th> <th> Day 6 </th>
+          <th> Day 7 </th>
+      </tr>
+      <tr class = "wkrow">
+          <td class = 'select' id = '0'> {{=program[0]}}</td> <td class = 'select'> {{=program[1]}} </td>
+          <td class = 'select'> {{=program[2]}} </td> <td class = 'select'> {{=program[3]}} </td>
+          <td class = 'select'> {{=program[4]}} </td> <td class = 'select'> {{=program[5]}} </td>
+          <td class = 'select'> {{=program[6]}} </td>
+      </tr>
+      <tr class = "rowbg">
+          <th> Day 8 </th> <th> Day 9 </th>
+          <th> Day 10 </th> <th> Day 11 </th>
+          <th> Day 12 </th> <th> Day 13 </th>
+          <th> Day 14 </th>
+      </tr>
+      <tr class = "wkrow">
+          <td class = 'select'> {{=program[7]}}  </td> <td class = 'select'> {{=program[8]}}   </td>
+          <td class = 'select'> {{=program[9]}}  </td> <td class = 'select'> {{=program[10]}} </td>
+          <td class = 'select'> {{=program[11]}} </td> <td class = 'select'> {{=program[12]}}</td>
+          <td class = 'select'> {{=program[13]}} </td>
+      </tr>
+      <tr class = "rowbg">
+          <th> Day 15 </th> <th> Day 16 </th>
+          <th> Day 17 </th> <th> Day 18 </th>
+          <th> Day 19 </th> <th> Day 20 </th>
+          <th> Day 21 </th>
+      </tr>
+      <tr class = "wkrow">
+          <td class = 'select'> {{=program[14]}}</td> <td class = 'select'> {{=program[15]}}</td>
+          <td class = 'select'> {{=program[16]}}</td> <td class = 'select'> {{=program[17]}}</td>
+          <td class = 'select'> {{=program[18]}}</td> <td class = 'select'> {{=program[19]}} </td>
+          <td class = 'select'> {{=program[20]}} </td>
+      </tr>
+      <tr class = "rowbg">
+          <th> Day 22 </th> <th> Day 23 </th>
+          <th> Day 24 </th> <th> Day 25 </th>
+          <th> Day 26 </th> <th> Day 27 </th>
+          <th> Day 28 </th>
+      </tr>
+      <tr class = "wkrow">
+          <td class = 'select'> {{=program[21]}}</td> <td class = 'select'> {{=program[22]}}</td>
+          <td class = 'select'> {{=program[23]}}</td> <td class = 'select'> {{=program[24]}}</td>
+          <td class = 'select'> {{=program[25]}}</td> <td class = 'select'> {{=program[26]}} </td>
+          <td class = 'select'> {{=program[27]}} </td>
+      </tr>
+  </thead>
+</table>
+
+<div class="modal fade" id = "myModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Modal title</h4>
+      </div>
+      <div class="modal-body">
+        <p>Going to want details of the current exercise as well as a choice to change workout plan for that day.</p>
+          <div id = "bodyId" value = ""> </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        {{=A('Save Changes', _class ="btn btn-info", _href = (URL('default', 'my_workout', vars = dict(body = body, program = program))))}}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CSS to make the text bold and larger than average -->
+<style type = 'text/css'>
+    .rowbg{
+        background-color: #cddcd5;
+    }
+    .wkrow{
+        height: 120px;
+    }
+    .selectcell{
+        background-color: #F0F0F0
+    }
+</style>
+<!-- hover function from: http://api.jquery.com/hover/ -->
+
+<script type = 'text/javascript'>
+    //changes background color of cell when mouse hovers over
+    $('td.select').hover(function(){
+        $(this).toggleClass('selectcell');
+    });
+    //when a cell is clicked a modal pops up
+    $(document).on("click", ".myModal", function(){
+        console.log("click");
+        $('#myModal').modal({show:true});
+    });
+
+</script>
